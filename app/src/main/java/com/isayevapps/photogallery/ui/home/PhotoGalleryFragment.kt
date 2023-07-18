@@ -1,7 +1,6 @@
 package com.isayevapps.photogallery.ui.home
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import com.isayevapps.photogallery.databinding.FragmentPhotoGalleryBinding
+import com.isayevapps.photogallery.ui.adapters.PhotoListAdapter
 import kotlinx.coroutines.launch
 
 class PhotoGalleryFragment : Fragment() {
@@ -38,7 +38,7 @@ class PhotoGalleryFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 photoGalleryViewModel.galleryItems.collect { items ->
-                    Log.d("MyTaggg", "Response received: $items")
+                    binding.photoGrid.adapter = PhotoListAdapter(items)
                 }
             }
         }
