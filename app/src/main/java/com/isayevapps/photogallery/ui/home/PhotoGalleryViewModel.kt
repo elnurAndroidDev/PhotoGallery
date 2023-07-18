@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class PhotoGalleryViewModel : ViewModel() {
-    private val repository = PhotoRepository()
+    private val photoRepository = PhotoRepository()
 
     private val _galleryItems: MutableStateFlow<List<GalleryItem>> = MutableStateFlow(emptyList())
     val galleryItems: StateFlow<List<GalleryItem>>
@@ -20,12 +20,25 @@ class PhotoGalleryViewModel : ViewModel() {
     init {
         viewModelScope.launch {
             try {
-                val items = PhotoRepository().fetchPhotos()
-                Log.d("MyTaggg", "Items received: $items")
+                val items = PhotoRepository().searchPhotos("toys")
                 _galleryItems.value = items
             } catch (e: Exception) {
                 Log.d("MyTaggg", "Ooops! ${e.message.toString()}")
             }
         }
     }
+
+    fun setQuery(query: String) {
+        viewModelScope.launch { _galleryItems.value = fetchGalleryItems(query) }
+    }
+
+
+    private suspend fun fetchGalleryItems(query: String): List<GalleryItem> {
+        return if (query.isNotEmpty()) {
+            photoRepository.searchPhotos(query)
+        } else {
+            photoRepository.fetchPhotos()
+        }
+    }
+
 }
