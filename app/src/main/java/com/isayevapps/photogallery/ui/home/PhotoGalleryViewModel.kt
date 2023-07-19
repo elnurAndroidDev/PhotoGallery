@@ -4,32 +4,46 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.isayevapps.photogallery.api.GalleryItem
-import com.isayevapps.photogallery.repository.PhotoRepository
+import com.isayevapps.photogallery.repositories.PhotoRepository
+import com.isayevapps.photogallery.repositories.PreferencesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class PhotoGalleryViewModel : ViewModel() {
     private val photoRepository = PhotoRepository()
+    private val preferencesRepository = PreferencesRepository.get()
 
-    private val _galleryItems: MutableStateFlow<List<GalleryItem>> = MutableStateFlow(emptyList())
-    val galleryItems: StateFlow<List<GalleryItem>>
-        get() = _galleryItems.asStateFlow()
+
+    private val _uiState: MutableStateFlow<PhotoGalleryUiState> = MutableStateFlow(
+        PhotoGalleryUiState()
+    )
+    val uiState: StateFlow<PhotoGalleryUiState>
+        get() = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            try {
-                val items = PhotoRepository().searchPhotos("toys")
-                _galleryItems.value = items
-            } catch (e: Exception) {
-                Log.d("MyTaggg", "Ooops! ${e.message.toString()}")
+            preferencesRepository.storedQuery.collectLatest { storedQuery ->
+                try {
+                    val items = PhotoRepository().searchPhotos(storedQuery)
+                    _uiState.update { oldState ->
+                        oldState.copy(
+                            images = items,
+                            query = storedQuery
+                        )
+                    }
+                } catch (e: Exception) {
+                    Log.d("MyTaggg", "Ooops! ${e.message.toString()}")
+                }
             }
         }
     }
 
     fun setQuery(query: String) {
-        viewModelScope.launch { _galleryItems.value = fetchGalleryItems(query) }
+        viewModelScope.launch { preferencesRepository.setStoredQuery(query) }
     }
 
 

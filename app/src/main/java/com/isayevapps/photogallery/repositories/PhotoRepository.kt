@@ -1,4 +1,4 @@
-package com.isayevapps.photogallery.repository
+package com.isayevapps.photogallery.repositories
 
 import com.isayevapps.photogallery.api.FlickrApi
 import com.isayevapps.photogallery.api.PhotoInterceptor

@@ -30,6 +30,8 @@ class PhotoGalleryFragment : Fragment() {
 
     private val photoGalleryViewModel: PhotoGalleryViewModel by viewModels()
 
+    private var searchView: SearchView? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -44,8 +46,9 @@ class PhotoGalleryFragment : Fragment() {
         setupMenu()
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                photoGalleryViewModel.galleryItems.collect { items ->
-                    binding.photoGrid.adapter = PhotoListAdapter(items)
+                photoGalleryViewModel.uiState.collect { state ->
+                    binding.photoGrid.adapter = PhotoListAdapter(state.images)
+                    searchView?.setQuery(state.query, false)
                 }
             }
         }
@@ -56,7 +59,7 @@ class PhotoGalleryFragment : Fragment() {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.search_menu, menu)
                 val searchItem: MenuItem = menu.findItem(R.id.menu_item_search)
-                val searchView = searchItem.actionView as? SearchView
+                searchView = searchItem.actionView as? SearchView
 
                 searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                     override fun onQueryTextSubmit(query: String?): Boolean {
@@ -71,18 +74,17 @@ class PhotoGalleryFragment : Fragment() {
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                if (menuItem.itemId == R.id.menu_item_clear){
+                    photoGalleryViewModel.setQuery("")
+                    return true
+                }
                 return false
             }
 
-            /*override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                return when (menuItem.itemId) {
-                    R.id.add_crime -> {
-                        showNewCrime()
-                        true
-                    }
-                    else -> true
-                }
-            }*/
+            override fun onMenuClosed(menu: Menu) {
+                super.onMenuClosed(menu)
+                searchView = null
+            }
 
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
