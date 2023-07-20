@@ -28,7 +28,7 @@ class PhotoGalleryViewModel : ViewModel() {
         viewModelScope.launch {
             preferencesRepository.storedQuery.collectLatest { storedQuery ->
                 try {
-                    val items = PhotoRepository().searchPhotos(storedQuery)
+                    val items = fetchGalleryItems(storedQuery)
                     _uiState.update { oldState ->
                         oldState.copy(
                             images = items,
@@ -39,6 +39,18 @@ class PhotoGalleryViewModel : ViewModel() {
                     Log.d("MyTaggg", "Ooops! ${e.message.toString()}")
                 }
             }
+        }
+
+        viewModelScope.launch {
+            preferencesRepository.isPolling.collect { isPolling ->
+                _uiState.update { it.copy(isPolling = isPolling) }
+            }
+        }
+    }
+
+    fun toggleIsPolling() {
+        viewModelScope.launch {
+            preferencesRepository.setPolling(!uiState.value.isPolling)
         }
     }
 

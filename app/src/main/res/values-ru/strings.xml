@@ -3,4 +3,11 @@
     <string name="app_name">PhotoGallery</string>
     <string name="search">Поиск</string>
     <string name="clear_search">Очистить поиск</string>
+    <string name="notification_channel_name">Фоновые обновления</string>
+    <string name="new_pictures_title">Новые картинки</string>
+    <string name="new_pictures_text">Вас ждут новые картинки в PhotoGallery</string>
+
+    <string name="start_polling">Начать поллинг</string>
+    <string name="stop_polling">Остановить поллинг</string>
+
 </resources>
